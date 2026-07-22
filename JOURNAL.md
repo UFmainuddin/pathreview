@@ -17,3 +17,19 @@ I chose Tier 1 because this is my first time contributing to a large multi-modul
 **Setup confirmation:** [x] App runs locally at localhost:5173
 
 **Cohort ledger:** [x] Issue added to cohort ledger
+
+---
+
+## Week 8 — Reproduction & solution planning
+
+**Reproduction commit link:** https://github.com/UFmainuddin/pathreview/commit/de11633
+
+**Reproduction summary:**
+Ran `pytest tests/unit/test_resume_parser.py -v` locally and confirmed 5 tests fail. The key failure is `test_detect_sections`, which passes indented text (e.g., `"    Experience:"`) and asserts `len(sections) > 0` — the actual result is `[]` because all four regex patterns in `_detect_sections()` require the section keyword at column 0 (`^section`) or immediately after a newline (`\nsection`), with no allowance for leading whitespace. A related bug in `_strip_markdown()` — its `^#+\s+` pattern also fails to strip `#` headers with leading whitespace — was discovered during reproduction and causes two additional test failures.
+
+**PLAN.md link:** https://github.com/UFmainuddin/pathreview/blob/fix/147-resume-section-whitespace/PLAN.md
+
+**Walkthrough video (recommended):** N/A
+
+**Blockers or open questions:**
+The `_strip_markdown()` bug was not mentioned in issue #147 but was discovered during reproduction (it causes `test_strip_markdown_syntax` and `test_parse_markdown_resume` to fail). The fix is one character in the same file. I plan to include it in the same PR and call it out in the PR description — but want to confirm this is acceptable scope for a Tier 1 issue before Week 9.
