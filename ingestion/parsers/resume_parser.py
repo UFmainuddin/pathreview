@@ -5,7 +5,6 @@ from pypdf import PdfReader
 
 from .base import BaseParser, ParseResult
 
-
 SECTION_HEADERS = {
     "experience",
     "education",
@@ -75,7 +74,7 @@ class ResumeParser(BaseParser):
                 source_type="resume",
             )
         except Exception as e:
-            raise ValueError(f"Failed to parse PDF: {str(e)}")
+            raise ValueError(f"Failed to parse PDF: {str(e)}") from e
 
     def _parse_markdown(self, content: str) -> ParseResult:
         """Extract text from markdown resume, stripping markdown syntax."""
@@ -130,7 +129,19 @@ class ResumeParser(BaseParser):
         text_lower = text.lower()
 
         for section in SECTION_HEADERS:
-            # Look for section header patterns
+            # BUG (issue #147): patterns below anchor section headers at the exact
+            # start of a line (^) or immediately after a newline (\n).  Text
+            # extracted from PDFs via pypdf commonly preserves leading indentation,
+            # so a line like "    Experience:" never matches any of these patterns
+            # and detected_sections always comes back empty.
+            #
+            # Reproduction (confirmed locally):
+            #   from ingestion.parsers.resume_parser import ResumeParser
+            #   r = ResumeParser()
+            #   res = r.parse('\n    Jane Doe\n\n    Education:\n    - B.S. CS\n')
+            #   assert res.metadata['detected_sections'] == []  # BUG: should contain 'Education'
+            #
+            # Fix: replace ^ with ^\s* and \n with \n\s* in all four patterns.
             patterns = [
                 rf"^{re.escape(section)}\s*$",
                 rf"^{re.escape(section)}\s*[:|-]",
