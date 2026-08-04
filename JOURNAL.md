@@ -58,7 +58,7 @@ None.
 
 ### Check-in 2 (end of week)
 
-**PR link:** [link to be added after PR is opened]
+**PR link:** https://github.com/ascherj/pathreview/pull/800
 
 **Branch:** `fix/147-resume-section-whitespace`
 
