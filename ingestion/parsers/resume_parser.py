@@ -97,8 +97,8 @@ class ResumeParser(BaseParser):
 
     def _strip_markdown(self, content: str) -> str:
         """Remove markdown syntax from content."""
-        # Remove markdown headers
-        text = re.sub(r"^#+\s+", "", content, flags=re.MULTILINE)
+        # Remove markdown headers (including those with leading whitespace)
+        text = re.sub(r"^\s*#+\s+", "", content, flags=re.MULTILINE)
 
         # Remove markdown links [text](url)
         text = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"\1", text)
@@ -129,24 +129,14 @@ class ResumeParser(BaseParser):
         text_lower = text.lower()
 
         for section in SECTION_HEADERS:
-            # BUG (issue #147): patterns below anchor section headers at the exact
-            # start of a line (^) or immediately after a newline (\n).  Text
-            # extracted from PDFs via pypdf commonly preserves leading indentation,
-            # so a line like "    Experience:" never matches any of these patterns
-            # and detected_sections always comes back empty.
-            #
-            # Reproduction (confirmed locally):
-            #   from ingestion.parsers.resume_parser import ResumeParser
-            #   r = ResumeParser()
-            #   res = r.parse('\n    Jane Doe\n\n    Education:\n    - B.S. CS\n')
-            #   assert res.metadata['detected_sections'] == []  # BUG: should contain 'Education'
-            #
-            # Fix: replace ^ with ^\s* and \n with \n\s* in all four patterns.
+            # Fix for issue #147: patterns now allow optional leading whitespace
+            # before section headers so that PDF-extracted text with indentation
+            # (e.g., "    Experience:") is correctly detected.
             patterns = [
-                rf"^{re.escape(section)}\s*$",
-                rf"^{re.escape(section)}\s*[:|-]",
-                rf"\n{re.escape(section)}\s*$",
-                rf"\n{re.escape(section)}\s*[:|-]",
+                rf"^\s*{re.escape(section)}\s*$",
+                rf"^\s*{re.escape(section)}\s*[:|-]",
+                rf"\n\s*{re.escape(section)}\s*$",
+                rf"\n\s*{re.escape(section)}\s*[:|-]",
             ]
 
             for pattern in patterns:

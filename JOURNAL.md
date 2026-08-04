@@ -33,3 +33,41 @@ Ran `pytest tests/unit/test_resume_parser.py -v` locally and confirmed 5 tests f
 
 **Blockers or open questions:**
 The `_strip_markdown()` bug was not mentioned in issue #147 but was discovered during reproduction (it causes `test_strip_markdown_syntax` and `test_parse_markdown_resume` to fail). The fix is one character in the same file. I plan to include it in the same PR and call it out in the PR description — but want to confirm this is acceptable scope for a Tier 1 issue before Week 9.
+
+---
+
+## Week 9 — Solution building & PR submission
+
+### Check-in 1 (mid-week)
+
+**Current progress:**
+All sub-tasks from PLAN.md are complete. Applied both fixes to `ingestion/parsers/resume_parser.py`:
+- Sub-task 1: Updated all 4 regex patterns in `_detect_sections()` — `^` → `^\s*` and `\n` → `\n\s*` — so indented PDF-extracted headers are matched.
+- Sub-task 2: Updated the header-removal pattern in `_strip_markdown()` — `^#+\s+` → `^\s*#+\s+` — so markdown headers with leading whitespace are stripped.
+- Sub-task 3: All 10 tests in `tests/unit/test_resume_parser.py` pass (was 5 failing before the fix).
+- Sub-task 4: Full `make test-unit` run confirms no regressions introduced by our change (48 pre-existing failures across unrelated test files remain unchanged).
+- Sub-task 5: `ruff check ingestion/parsers/resume_parser.py` — all checks passed.
+
+**Next steps:**
+Open PR to upstream `ascherj/pathreview`, fill out PR template completely, update JOURNAL.md Check-in 2 with PR link, submit branch URL via course portal.
+
+**Blockers:**
+None.
+
+---
+
+### Check-in 2 (end of week)
+
+**PR link:** [link to be added after PR is opened]
+
+**Branch:** `fix/147-resume-section-whitespace`
+
+**What you built:**
+Fixed `_detect_sections()` in `ingestion/parsers/resume_parser.py` by adding `\s*` after the `^` and `\n` anchors in all four regex patterns, so section headers with leading whitespace (common in pypdf-extracted text) are correctly detected instead of always returning an empty list. Also fixed a related bug in `_strip_markdown()` where markdown `#` headers with leading whitespace were not being stripped — changed `^#+\s+` to `^\s*#+\s+`.
+
+**Tests added or updated:**
+No new test files — the 5 pre-existing failing tests in `tests/unit/test_resume_parser.py` (`test_detect_sections`, `test_parse_single_column_resume_text`, `test_parse_resume_no_work_experience`, `test_parse_markdown_resume`, `test_strip_markdown_syntax`) now all pass. All 10 tests in the file pass. The full unit suite (`make test-unit`) shows the same 48 pre-existing failures in unrelated files; our change introduced zero new failures.
+
+**Self-review confirmation:** [x] make check passes (our file: `ruff check ingestion/parsers/resume_parser.py` — all checks passed; 48 pre-existing failures in unrelated files unchanged) [x] make test-unit passes (10/10 resume parser tests pass; no new failures introduced)
+
+**Draft PR feedback received from:** none
