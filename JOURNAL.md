@@ -71,3 +71,36 @@ No new test files — the 5 pre-existing failing tests in `tests/unit/test_resum
 **Self-review confirmation:** [x] make check passes (our file: `ruff check ingestion/parsers/resume_parser.py` — all checks passed; 48 pre-existing failures in unrelated files unchanged) [x] make test-unit passes (10/10 resume parser tests pass; no new failures introduced)
 
 **Draft PR feedback received from:** none
+
+---
+
+## Week 10 - Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No - still awaiting review
+
+**Summary of feedback:**
+No reviewer feedback has arrived yet. For Summer 2026, reviewer feedback is not provided, so I am marking that I am still awaiting review.
+
+**How you responded:**
+No response was needed because no reviewer feedback came in. I still checked my PR and made sure my Week 10 journal is updated.
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+The harder part was understanding how a small regex change could affect the resume parser. At first, the issue looked very simple, but I had to read `ingestion/parsers/resume_parser.py` carefully to understand why leading spaces from PDF text made `_detect_sections()` fail.
+
+**What did you learn about working in a large codebase?**
+I learned that even a small change needs careful testing in a large codebase. I could not only change the regex and stop; I had to run `tests/unit/test_resume_parser.py` and also check the larger unit test result to make sure my fix did not create new problems.
+
+**How did AI tools help - and where did they fall short?**
+AI tools helped me understand the failing tests and explain the regex problem in simpler words. They were also useful for planning the fix for issue `#147`. But AI did not replace checking the real code and test output, because I still had to confirm that `_detect_sections()` and `_strip_markdown()` were the correct places to change.
+
+**What would you do differently if you started over?**
+If I started over, I would inspect the related helper functions earlier instead of only focusing on the exact issue description. The issue talked about section detection, but the markdown stripping problem was also related and caused more failing tests, so I would look for nearby similar patterns sooner.
+
+**What are you most proud of from this module?**
+I am most proud that I made a small but real fix and opened PR `#800` to the upstream PathReview project. The change was not large, but it made the parser handle indented resume sections better and all 10 resume parser tests passed after the fix.
